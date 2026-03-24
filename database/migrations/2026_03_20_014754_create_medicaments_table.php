@@ -17,7 +17,9 @@ return new class extends Migration
         $table->decimal('prix', 10, 2);
         $table->integer('quantite');
         $table->date('date_expiration');
+        $table->string('image')->nullable();
         $table->timestamps();
+
     });
 }
 

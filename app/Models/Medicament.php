@@ -10,6 +10,7 @@ class Medicament extends Model
     'nom',
     'prix',
     'quantite',
-    'date_expiration'
+    'date_expiration',
+    'image'
     ];
 }

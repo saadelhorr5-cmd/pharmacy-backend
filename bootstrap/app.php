@@ -9,8 +9,8 @@ return Application::configure(basePath: dirname(__DIR__))
     web: __DIR__.'/../routes/web.php',
     api: __DIR__.'/../routes/api.php',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
+    ->withMiddleware(function ($middleware) {
+        $middleware->redirectGuestsTo(fn () => null);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
