@@ -82,10 +82,18 @@ td {
 <body>
 
 <!-- HEADER -->
-<div class="header">
-    <h1>{{ $pharmacy }}</h1>
-    <p> {{ date('d/m/Y') }} | {{ date('F Y') }}</p>
-</div>
+<table width="100%" style="margin-bottom:20px;">
+<tr>
+    <td width="20%">
+        <img src="{{ public_path('logo.png') }}" width="60">
+    </td>
+
+    <td width="80%" style="text-align:right;">
+        <h2 style="margin:0; color:#4f46e5;">{{ $pharmacy }}</h2>
+        <p style="margin:0;">{{ date('d/m/Y') }}</p>
+    </td>
+</tr>
+</table>
 
 <hr>
 
