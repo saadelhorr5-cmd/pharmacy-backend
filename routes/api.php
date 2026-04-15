@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\UserController;
 use App\models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 // public
@@ -82,6 +83,24 @@ Route::middleware('auth:sanctum')->group(function () {
             'stocks' => $stocks
         ]);
 
+    });
+
+    
+
+    Route::get('/report/pdf', function () {
+
+        $totalRevenue = \App\Models\Vente::sum('total');
+        $totalVentes = \App\Models\Vente::count();
+        $lowStock = \App\Models\Medicament::where('quantite', '<', 5)->get();
+
+        $pdf = Pdf::loadView('report', [
+            'revenue' => $totalRevenue,
+            'ventes' => $totalVentes,
+            'lowStock' => $lowStock,
+            'pharmacy' => 'Pharma Saad'
+        ]);
+
+        return $pdf->download('report.pdf');
     });
 
     
