@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\UserController;
 use App\models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Http\Controllers\DashboardController;
 
 
 // public
@@ -27,9 +28,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/ventes', function () {
         return \App\Models\Vente::with('details.medicament',)->get();
     });
+    Route::get('/users', function () {
+        return \App\Models\User::all();
+    });
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users', [UserController::class, 'store']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::apiResource('users', UserController::class);
     
 
 
@@ -42,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
    
 
     
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 
     Route::get('/dashboard', function () {
 

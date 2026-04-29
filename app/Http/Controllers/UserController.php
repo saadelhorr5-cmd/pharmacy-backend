@@ -27,4 +27,21 @@ class UserController extends Controller
         User::destroy($id);
         return response()->json(['message' => 'deleted']);
     }
+    
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->role = $request->role;
+
+        if ($request->password) {
+            $user->password = bcrypt($request->password);
+        }
+
+        $user->save();
+
+        return response()->json(['message' => 'updated']);
+    }
 }
