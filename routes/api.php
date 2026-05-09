@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\BackupController;
 
 
 // public
@@ -15,6 +16,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/login', function () {
     return response()->json(['message' => 'Unauthenticated'], 401);
 })->name('login');
+Route::get('/backup', [BackupController::class, 'backup']);
 
 // protected
 Route::middleware('auth:sanctum')->group(function () {
@@ -109,6 +111,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         return $pdf->download('report.pdf');
     });
+
+    
 
     
 
