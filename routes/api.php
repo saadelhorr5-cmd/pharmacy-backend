@@ -4,7 +4,6 @@ use App\Http\Controllers\MedicamentController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\UserController;
-use App\models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BackupController;
@@ -28,7 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/ventes', [MedicamentController::class, 'vente']);
     Route::get('/ventes', function () {
-        return \App\Models\Vente::with('details.medicament',)->get();
+        return \App\Models\Vente::with('details.medicament')->latest()->get();
     });
     Route::get('/users', function () {
         return \App\Models\User::all();
@@ -49,57 +48,23 @@ Route::middleware('auth:sanctum')->group(function () {
 
    
 
-    
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/stats', [DashboardController::class, 'stats']);
 
-    Route::get('/dashboard', function () {
+    
 
-        $totalRevenue = \App\Models\Vente::sum('total');
-        $totalVentes = \App\Models\Vente::count();
+    Route::get('/report/pdf', function (Request $request) {
+        $days = $request->get('days') === 'all' ? 'all' : (int) $request->get('days', 30);
+        $days = in_array($days, ['all', 7, 14, 30], true) ? $days : 30;
 
-        $lowStock = \App\Models\Medicament::where('quantite', '<', 5)->get();
+        $ventesQuery = \App\Models\Vente::query();
 
-        $ventes = \App\Models\Vente::with('details.medicament')
-            ->latest()
-            ->take(5)
-            ->get();
-
-        foreach ($ventes as $v) {
-            $user = User::find($v->user_id);
-            $v->user_name = $user ? $user->name : "Unknown";
+        if ($days !== 'all') {
+            $ventesQuery->where('created_at', '>=', now()->subDays($days));
         }
 
-        return response()->json([
-            'totalRevenue' => $totalRevenue,
-            'totalVentes' => $totalVentes,
-            'lowStock' => $lowStock,
-            'ventes' => $ventes
-        ]);
-
-    });
-       
-
-    Route::get('/stats', function () {
-
-        $ventes = \App\Models\Vente::selectRaw('DATE(created_at) as date, SUM(total) as total')
-            ->groupBy('date')
-            ->get();
-
-        $stocks = \App\Models\Medicament::select('nom', 'quantite')->get();
-
-        return response()->json([
-            'ventes' => $ventes,
-            'stocks' => $stocks
-        ]);
-
-    });
-
-    
-
-    Route::get('/report/pdf', function () {
-
-        $totalRevenue = \App\Models\Vente::sum('total');
-        $totalVentes = \App\Models\Vente::count();
+        $totalRevenue = (clone $ventesQuery)->sum('total');
+        $totalVentes = (clone $ventesQuery)->count();
         $lowStock = \App\Models\Medicament::where('quantite', '<', 5)->get();
 
         $pdf = Pdf::loadView('report', [

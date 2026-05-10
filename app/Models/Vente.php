@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\models\User;
-
 
 class Vente extends Model
 {
@@ -18,11 +16,10 @@ class Vente extends Model
 
     public function user()
     {
-        return $this->belongsTo(App\Models\User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
         
 
 }
-
 
 
