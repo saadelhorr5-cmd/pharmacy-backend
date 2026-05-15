@@ -56,6 +56,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/report/pdf', function (Request $request) {
         $days = $request->get('days') === 'all' ? 'all' : (int) $request->get('days', 30);
         $days = in_array($days, ['all', 7, 14, 30], true) ? $days : 30;
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+        $periodLabel = $request->get('period_label');
+
+        if (!$periodLabel) {
+            $periodLabel = $days === 'all'
+                ? 'Toute la periode'
+                : now()->subDays($days)->format('Y-m-d') . ' au ' . now()->format('Y-m-d');
+        }
 
         $ventesQuery = \App\Models\Vente::query();
 
@@ -71,7 +80,10 @@ Route::middleware('auth:sanctum')->group(function () {
             'revenue' => $totalRevenue,
             'ventes' => $totalVentes,
             'lowStock' => $lowStock,
-            'pharmacy' => 'Pharma Saad'
+            'pharmacy' => 'Pharma Saad',
+            'periodLabel' => $periodLabel,
+            'startDate' => $startDate,
+            'endDate' => $endDate
         ]);
 
         return $pdf->download('report.pdf');

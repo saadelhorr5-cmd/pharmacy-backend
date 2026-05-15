@@ -26,6 +26,27 @@ body {
     font-size: 12px;
 }
 
+.period {
+    margin: 18px 0;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-left: 4px solid #4f46e5;
+    background: #f8fafc;
+}
+
+.period .label {
+    color: #666;
+    font-size: 12px;
+    margin: 0 0 4px 0;
+}
+
+.period .value {
+    color: #111827;
+    font-size: 15px;
+    font-weight: bold;
+    margin: 0;
+}
+
 /* STATS */
 .stats {
     width: 100%;
@@ -96,6 +117,17 @@ td {
 </table>
 
 <hr>
+
+<div class="period">
+    <p class="label">Periode du rapport</p>
+    <p class="value">
+        @if(!empty($startDate) && !empty($endDate))
+            Du {{ $startDate }} au {{ $endDate }}
+        @else
+            {{ $periodLabel }}
+        @endif
+    </p>
+</div>
 
 <!-- STATS -->
 <table class="stats">
