@@ -55,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/report/pdf', function (Request $request) {
         $days = $request->get('days') === 'all' ? 'all' : (int) $request->get('days', 30);
-        $days = in_array($days, ['all', 7, 14, 30], true) ? $days : 30;
+        $days = in_array($days, ['all', 1, 7, 14, 30], true) ? $days : 30;
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
         $periodLabel = $request->get('period_label');
@@ -68,7 +68,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
         $ventesQuery = \App\Models\Vente::query();
 
-        if ($days !== 'all') {
+        if ($startDate && $endDate) {
+            $ventesQuery->whereBetween('created_at', [
+                \Carbon\Carbon::parse($startDate)->startOfDay(),
+                \Carbon\Carbon::parse($endDate)->endOfDay()
+            ]);
+        } elseif ($days !== 'all') {
             $ventesQuery->where('created_at', '>=', now()->subDays($days));
         }
 
@@ -87,6 +92,53 @@ Route::middleware('auth:sanctum')->group(function () {
         ]);
 
         return $pdf->download('report.pdf');
+    });
+
+    Route::get('/report/user-sales/pdf', function (Request $request) {
+        $days = $request->get('days') === 'all' ? 'all' : (int) $request->get('days', 30);
+        $days = in_array($days, ['all', 1, 7, 14, 30], true) ? $days : 30;
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+        $periodLabel = $request->get('period_label');
+        $userName = trim($request->get('user_name', ''));
+
+        if (!$periodLabel) {
+            $periodLabel = $days === 'all'
+                ? 'Toute la periode'
+                : now()->subDays($days)->format('Y-m-d') . ' au ' . now()->format('Y-m-d');
+        }
+
+        $ventesQuery = \App\Models\Vente::with(['details.medicament', 'user'])->latest();
+
+        if ($startDate && $endDate) {
+            $ventesQuery->whereBetween('created_at', [
+                \Carbon\Carbon::parse($startDate)->startOfDay(),
+                \Carbon\Carbon::parse($endDate)->endOfDay()
+            ]);
+        } elseif ($days !== 'all') {
+            $ventesQuery->where('created_at', '>=', now()->subDays($days));
+        }
+
+        if ($userName !== '') {
+            $ventesQuery->whereHas('user', function ($query) use ($userName) {
+                $query->whereRaw('LOWER(name) = ?', [strtolower($userName)]);
+            });
+        }
+
+        $ventes = $ventesQuery->get();
+
+        $pdf = Pdf::loadView('user-sales-report', [
+            'pharmacy' => 'Pharma Saad',
+            'periodLabel' => $periodLabel,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'userName' => $userName,
+            'ventes' => $ventes,
+            'totalRevenue' => $ventes->sum('total'),
+            'totalVentes' => $ventes->count()
+        ]);
+
+        return $pdf->download('user-sales-report.pdf');
     });
 
     

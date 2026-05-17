@@ -24,6 +24,10 @@ class MedicamentController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
+        $request->validate([
+            'prix' => ['required', 'numeric', 'min:0'],
+        ]);
+
        
         
         //  نقلب واش الدواء موجود
@@ -75,6 +79,10 @@ class MedicamentController extends Controller
         if (!$user || $user->role !== 'admin') {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
+
+        $request->validate([
+            'prix' => ['required', 'numeric', 'min:0'],
+        ]);
 
         $med = Medicament::find($id);
         $med->update($request->all());
